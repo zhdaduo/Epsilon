@@ -6,3 +6,11 @@ a client of [https://www.diycode.cc/](https://www.diycode.cc/)
 
 # preview
 ![](https://github.com/zhdaduo/Epsilon/raw/master/image/screenshot.png)
+
+# thanks
+
+[plusend/DiyCode](https://github.com/plusend/DiyCode)
+
+[linsneider/DiyCodeAndroid](https://github.com/linsneider/DiyCodeAndroid)
+
+[diycode-sdk](https://www.diycode.cc/topics/665)
