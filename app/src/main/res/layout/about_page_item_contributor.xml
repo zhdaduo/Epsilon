@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  style="@style/AboutPage.Item.Card"
+  >
+
+  <ImageView
+    android:id="@+id/avatar"
+    style="@style/AboutPage.ContributorAvatar"
+    tools:ignore="ContentDescription"
+    tools:src="#000000"/>
+
+  <TextView
+    android:id="@+id/name"
+    style="@style/AboutPage.ContributorName"
+    android:layout_alignTop="@id/avatar"
+    android:layout_toEndOf="@id/avatar"
+    android:layout_toRightOf="@id/avatar"
+    tools:text="drakeet"
+    />
+
+  <TextView
+    android:id="@+id/desc"
+    style="@style/AboutPage.ContributorDesc"
+    android:layout_marginTop="7dp"
+    android:layout_below="@id/name"
+    android:layout_toEndOf="@id/avatar"
+    android:layout_toRightOf="@id/avatar"
+    tools:text="Developer and Designer"
+    />
+
+</RelativeLayout>

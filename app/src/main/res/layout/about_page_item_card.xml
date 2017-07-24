@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  style="@style/AboutPage.Item.Card"
+  tools:ignore="RtlHardcoded"
+  >
+
+  <TextView
+    android:id="@+id/content"
+    style="@style/AboutPage.CardContent"
+    tools:text="content"/>
+
+  <TextView
+    android:id="@+id/action"
+    style="@style/AboutPage.FrameButton.Light"
+    android:layout_alignParentRight="true"
+    android:layout_below="@id/content"
+    tools:text="button"/>
+
+</RelativeLayout>

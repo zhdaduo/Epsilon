@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@color/windowBackground"
+  android:fitsSystemWindows="true"
+  android:orientation="vertical"
+  tools:context="com.example.bill.epsilon.ui.topic.CreateReply.CreateReplyActivity"
+  >
+  <include
+    layout="@layout/toolbar"
+    />
+  <RelativeLayout
+    android:id="@+id/activity_create_topic_reply"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    >
+
+    <TextView
+      android:id="@+id/title"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="16dp"
+      android:textColor="@color/color_333333"
+      android:textSize="@dimen/text_dimens_22sp"
+      />
+
+    <View
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_marginTop="8dp"
+      android:layout_below="@+id/title"
+      android:background="@color/line_divider"
+      />
+
+    <EditText
+      android:id="@+id/body"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="16dp"
+      android:layout_below="@id/title"
+      android:hint="在此输入评论内容"
+      android:textColor="@color/color_secondary_999999"
+      android:textSize="@dimen/text_dimens_12sp"
+      />
+
+    <TextView
+      android:id="@+id/btn_delete"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="end"
+      android:layout_marginTop="@dimen/spacing_m"
+      android:layout_below="@id/body"
+      android:layout_alignParentEnd="true"
+      android:background="@drawable/bg_press"
+      android:text="@string/delete"
+      android:textColor="@color/colorAccent"
+      android:textSize="15sp"
+      android:visibility="gone"/>
+  </RelativeLayout>
+</LinearLayout>

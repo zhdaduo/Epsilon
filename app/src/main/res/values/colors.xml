@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <color name="colorPrimary">#ffffff</color>
+  <color name="colorPrimaryDark">@color/color_2e2e2e</color>
+  <color name="colorAccent">#EB5424</color>
+  <color name="color_333333">#333333</color>
+  <color name="color_secondary_999999">#999999</color>
+  <color name="color_7f000000">#7f000000</color>
+  <color name="color_f0f0f0">#f0f0f0</color>
+  <color name="color_ffffff">#ffffff</color>
+  <color name="color_62646c">#62646c</color>
+  <color name="color_2e2e2e">#2e2e2e</color>
+  <color name="windowBackground">#f4f4f4</color>
+  <color name="color_515a74">#515a74</color>
+  <color name="white">#ffffff</color>
+  <color name="line_divider">#aaaaaa</color>
+  <color name="color_000000">#000000</color>
+  <color name="color_c8c8ce">#c8c8ce</color>
+  <color name="color_999999">#999999</color>
+  <color name="color_4d4d4d">#4d4d4d</color>
+  <color name="color_666666">#666666</color>
+
+  <!-- AboutActivity -->
+  <color name="about_page_card_background">#ffffff</color>
+  <color name="about_page_card_shadow">#10000000</color>
+  <color name="about_page_background">#eeeeee</color>
+  <color name="about_page_category_text_color">#757575</color>
+  <color name="about_page_card_text_color">#424242</color>
+  <color name="about_page_selected">#44000000</color>
+  <color name="about_page_line">#E5E0E0</color>
+  <color name="about_page_name_color">#424242</color>
+  <color name="about_page_desc_color">#757575</color>
+  <color name="about_page_license_content">#424242</color>
+  <color name="about_page_hint">#757575</color>
+  <color name="tv_grey">#b2ffffff</color>
+</resources>
