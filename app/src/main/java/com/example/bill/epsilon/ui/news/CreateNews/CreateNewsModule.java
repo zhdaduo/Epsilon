@@ -1,7 +1,7 @@
 package com.example.bill.epsilon.ui.news.CreateNews;
 
-import com.example.bill.epsilon.api.NewsNodeService;
-import com.example.bill.epsilon.api.NewsService;
+import com.example.bill.epsilon.api.server.NewsNodeService;
+import com.example.bill.epsilon.api.server.NewsService;
 import com.example.bill.epsilon.internal.di.scope.PerActivity;
 import com.example.bill.epsilon.ui.news.CreateNews.CreateNewsMVP.View;
 import dagger.Module;

@@ -1,7 +1,7 @@
 package com.example.bill.epsilon.ui.topic.CreateTopic;
 
-import com.example.bill.epsilon.api.TopicNodeService;
-import com.example.bill.epsilon.api.TopicService;
+import com.example.bill.epsilon.api.server.TopicNodeService;
+import com.example.bill.epsilon.api.server.TopicService;
 import com.example.bill.epsilon.bean.topic.TopicDetail;
 import com.example.bill.epsilon.bean.topicnode.Node;
 import com.example.bill.epsilon.internal.di.scope.PerActivity;

@@ -1,6 +1,6 @@
 package com.example.bill.epsilon.ui.user.User;
 
-import com.example.bill.epsilon.api.UserService;
+import com.example.bill.epsilon.api.server.UserService;
 import com.example.bill.epsilon.internal.di.scope.PerActivity;
 import com.example.bill.epsilon.ui.user.User.UserMVP.View;
 import dagger.Module;

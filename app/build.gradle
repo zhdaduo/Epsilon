@@ -87,7 +87,10 @@ dependencies {
     compile rootProject.ext.dependencies["bga-swipebacklayout"]
     compile rootProject.ext.dependencies["multitype"]
     compile rootProject.ext.dependencies["pgyersdk"]
+    compile rootProject.ext.dependencies["RxCache"]
+    compile rootProject.ext.dependencies["RxCache-gson"]
     testCompile rootProject.ext.dependencies["junit"]
+
 }
 
 configurations.all {

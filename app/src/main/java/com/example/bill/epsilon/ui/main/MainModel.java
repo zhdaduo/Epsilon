@@ -1,6 +1,6 @@
 package com.example.bill.epsilon.ui.main;
 
-import com.example.bill.epsilon.api.NotificationService;
+import com.example.bill.epsilon.api.server.NotificationService;
 import com.example.bill.epsilon.bean.event.NotificationsUnreadCount;
 import com.example.bill.epsilon.internal.di.scope.PerActivity;
 import javax.inject.Inject;

@@ -1,10 +1,14 @@
 package com.example.bill.epsilon.ui.topic.TopicList;
 
-import com.example.bill.epsilon.api.TopicService;
+import com.example.bill.epsilon.api.server.TopicService;
+import com.example.bill.epsilon.api.cache.CacheProviders;
 import com.example.bill.epsilon.bean.base.Ok;
 import com.example.bill.epsilon.bean.topic.Topic;
 import com.example.bill.epsilon.internal.di.scope.PerFragment;
 import com.example.bill.epsilon.util.Constant;
+import io.rx_cache.DynamicKeyGroup;
+import io.rx_cache.EvictProvider;
+import io.rx_cache.Reply;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +19,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import rx.functions.Func1;
 
 /**
  * Created by Bill on 2017/7/16.
@@ -22,18 +27,27 @@ import org.jsoup.select.Elements;
 @PerFragment
 public class TopicListModel implements TopicListMVP.Model {
 
+  private final CacheProviders cacheProviders;
+
   @Inject
   TopicService service;
 
   @Inject
-  public TopicListModel() {
+  public TopicListModel(CacheProviders cacheProviders) {
+    this.cacheProviders = cacheProviders;
   }
 
   @Override
-  public Observable<List<Topic>> getTopics(int offset) {
+  public Observable<List<Topic>> getTopics(int offset, boolean update) {
     Observable<List<Topic>> topics = service
         .getTopics(null, null, offset, Constant.PAGE_SIZE);
-    return topics;
+    return cacheProviders.getTopics(topics, new DynamicKeyGroup(0, offset), new EvictProvider(update))
+        .flatMap(new Func1<Reply<List<Topic>>, Observable<List<Topic>>>() {
+          @Override
+          public Observable<List<Topic>> call(Reply<List<Topic>> listReply) {
+            return Observable.just(listReply.getData());
+          }
+        });
   }
 
   @Override

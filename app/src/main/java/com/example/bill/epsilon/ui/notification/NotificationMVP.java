@@ -34,7 +34,7 @@ public interface NotificationMVP {
 
   interface Model {
 
-    Observable<List<Notification>> getNotifications(int offset);
+    Observable<List<Notification>> getNotifications(int offset, boolean update);
 
     Observable<Ok> deleteNotification(int id);
 

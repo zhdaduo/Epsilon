@@ -1,4 +1,4 @@
-package com.example.bill.epsilon.api;
+package com.example.bill.epsilon.api.server;
 
 import com.example.bill.epsilon.bean.base.Ok;
 import retrofit2.http.DELETE;

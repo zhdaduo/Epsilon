@@ -28,6 +28,6 @@ public interface SiteMVP {
 
   interface Model {
 
-    Observable<List<Site>> getSite(int offset);
+    Observable<List<Site>> getSite(int offset, boolean update);
   }
 }

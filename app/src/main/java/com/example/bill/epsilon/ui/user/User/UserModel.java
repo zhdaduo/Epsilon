@@ -1,13 +1,17 @@
 package com.example.bill.epsilon.ui.user.User;
 
-import com.example.bill.epsilon.api.UserService;
+import com.example.bill.epsilon.api.cache.CacheProviders;
+import com.example.bill.epsilon.api.server.UserService;
 import com.example.bill.epsilon.bean.base.Ok;
 import com.example.bill.epsilon.bean.user.UserDetailInfo;
 import com.example.bill.epsilon.internal.di.scope.PerActivity;
-import com.example.bill.epsilon.util.Constant;
+import io.rx_cache.DynamicKey;
+import io.rx_cache.EvictDynamicKey;
+import io.rx_cache.Reply;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Observable;
+import rx.functions.Func1;
 
 /**
  * Created by Bill on 2017/7/18.
@@ -15,6 +19,8 @@ import rx.Observable;
 
 @PerActivity
 public class UserModel implements UserMVP.Model {
+
+  private final CacheProviders cacheProviders;
 
   @Inject
   @Named("UserService")
@@ -25,12 +31,20 @@ public class UserModel implements UserMVP.Model {
   UserService serviceAuth;
 
   @Inject
-  public UserModel() {
+  public UserModel(CacheProviders cacheProviders) {
+    this.cacheProviders =cacheProviders;
   }
 
   @Override
   public Observable<UserDetailInfo> getUserInfo(String username) {
-    return service.getUser(username);
+    Observable<UserDetailInfo> userDetailInfo = service.getUser(username);
+    return cacheProviders.getUserInfo(userDetailInfo, new DynamicKey(username), new EvictDynamicKey(true))
+        .flatMap(new Func1<Reply<UserDetailInfo>, Observable<UserDetailInfo>>() {
+          @Override
+          public Observable<UserDetailInfo> call(Reply<UserDetailInfo> userDetailInfoReply) {
+            return Observable.just(userDetailInfoReply.getData());
+          }
+        });
   }
 
   @Override

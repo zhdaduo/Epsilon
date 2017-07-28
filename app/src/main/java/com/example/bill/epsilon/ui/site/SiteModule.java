@@ -1,6 +1,6 @@
 package com.example.bill.epsilon.ui.site;
 
-import com.example.bill.epsilon.api.SiteService;
+import com.example.bill.epsilon.api.server.SiteService;
 import com.example.bill.epsilon.internal.di.scope.PerFragment;
 import com.example.bill.epsilon.ui.site.SiteMVP.View;
 import dagger.Module;

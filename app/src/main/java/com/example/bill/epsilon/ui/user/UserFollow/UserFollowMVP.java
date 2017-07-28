@@ -38,7 +38,7 @@ public interface UserFollowMVP {
 
   interface Model {
 
-    Observable<List<UserInfo>> getFollowings(String username, int offset);
+    Observable<List<UserInfo>> getFollowings(String username, int offset, boolean update);
 
     Observable<Ok> unfollowUser(String username);
 

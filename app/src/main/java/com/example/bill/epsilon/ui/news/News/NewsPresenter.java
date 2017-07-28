@@ -32,6 +32,7 @@ public class NewsPresenter implements NewsMVP.Presenter {
 
   private List<News> mList = new ArrayList<>();
   private int offset = 0;
+  private boolean isFirst = true;
   private CompositeSubscription compositeSubscription;
   private NewsMVP.Model model;
   private NewsMVP.View view;
@@ -69,8 +70,13 @@ public class NewsPresenter implements NewsMVP.Presenter {
     if (isRefresh) {
       offset = 0;
     }
+    boolean isEvictCache = isRefresh;
+    if (isRefresh && isFirst) {
+      isFirst = false;
+      isEvictCache = false;
+    }
     compositeSubscription.add(
-        model.getNews(offset)
+        model.getNews(offset, isEvictCache)
             .subscribeOn(Schedulers.io())
             .retryWhen(new RetryWithDelay(3, 2))
             .doOnSubscribe(new Action0() {

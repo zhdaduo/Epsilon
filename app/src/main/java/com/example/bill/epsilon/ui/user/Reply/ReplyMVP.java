@@ -31,6 +31,6 @@ public interface ReplyMVP {
   }
 
   interface Model {
-    Observable<List<Reply>> getUserReplies(String username, int offset);
+    Observable<List<Reply>> getUserReplies(String username, int offset, boolean update);
   }
 }

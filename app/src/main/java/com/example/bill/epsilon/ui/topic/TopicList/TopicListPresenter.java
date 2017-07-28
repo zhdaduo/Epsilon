@@ -46,6 +46,7 @@ public class TopicListPresenter implements TopicListMVP.Presenter {
 
   private List<Topic> mList = new ArrayList<>();
   private int offset = 0;
+  private boolean isFirst = true;
   private CompositeSubscription compositeSubscription;
   private TopicListMVP.Model model;
   private TopicListMVP.View view;
@@ -105,8 +106,13 @@ public class TopicListPresenter implements TopicListMVP.Presenter {
     if (isRefresh) {
       offset = 0;
     }
+    boolean isEvictCache = true;
+        if (isRefresh && isFirst) {
+            isFirst = false;
+            isEvictCache = false;
+        }
     compositeSubscription.add(
-    model.getTopics(offset)
+    model.getTopics(offset, isEvictCache)
         .subscribeOn(Schedulers.io())
         .retryWhen(new RetryWithDelay(3, 2))
         .doOnSubscribe(new Action0() {

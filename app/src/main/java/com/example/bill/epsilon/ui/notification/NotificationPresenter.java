@@ -39,6 +39,7 @@ public class NotificationPresenter implements NotificationMVP.Presenter {
 
   private List<Notification> mList = new ArrayList<>();
   private int offset = 0;
+  private boolean isFirst = true;
   private CompositeSubscription compositeSubscription;
   private NotificationMVP.Model model;
   private NotificationMVP.View view;
@@ -125,8 +126,13 @@ public class NotificationPresenter implements NotificationMVP.Presenter {
     if (isRefresh) {
       offset = 0;
     }
+    boolean isEvictCache = isRefresh;
+    if (isRefresh && isFirst) {
+      isFirst = false;
+      isEvictCache = false;
+    }
     compositeSubscription.add(
-        model.getNotifications(offset)
+        model.getNotifications(offset, isEvictCache)
             .subscribeOn(Schedulers.io())
             .retryWhen(new RetryWithDelay(3, 2))
             .doOnSubscribe(new Action0() {

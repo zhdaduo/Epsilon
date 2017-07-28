@@ -36,6 +36,6 @@ public interface TopicReplyMVP {
   }
 
   interface Model {
-    Observable<List<TopicReply>> getTopicReplies(int id, int offset);
+    Observable<List<TopicReply>> getTopicReplies(int id, int offset, boolean update);
   }
 }

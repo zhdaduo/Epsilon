@@ -72,7 +72,10 @@
     <activity android:name=".view.activity.SearchActivity"/>
 
     <activity android:name=".view.activity.SettingActivity"/>
-
+    <!--glide配置-->
+    <meta-data
+      android:name="com.example.bill.epsilon.view.widget.glide.GlideModelConfig"
+      android:value="GlideModule"/>
     <meta-data
       android:name="PGYER_APPID"
       android:value="${PGYER_APPID}">

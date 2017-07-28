@@ -38,7 +38,7 @@ public interface TopicListMVP {
 
   interface Model {
 
-    Observable<List<Topic>> getTopics(int offset);
+    Observable<List<Topic>> getTopics(int offset, boolean update);
 
     Observable<List<Topic>> getTopTopics();
 

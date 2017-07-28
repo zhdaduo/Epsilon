@@ -1,6 +1,6 @@
 package com.example.bill.epsilon.ui.user.SignIn;
 
-import com.example.bill.epsilon.api.UserService;
+import com.example.bill.epsilon.api.server.UserService;
 import com.example.bill.epsilon.bean.user.Token;
 import com.example.bill.epsilon.bean.user.UserDetailInfo;
 import com.example.bill.epsilon.internal.di.scope.PerActivity;

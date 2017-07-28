@@ -40,6 +40,7 @@ public class TopicReplyPresenter implements TopicReplyMVP.Presenter {
   private RxErrorHandler mErrorHandler;
   private Navigator navigator;
   private int offset = 0;
+  private boolean isFirst = true;
 
   @Inject
   public TopicReplyPresenter(Model model,
@@ -115,8 +116,13 @@ public class TopicReplyPresenter implements TopicReplyMVP.Presenter {
     if (isRefresh) {
       offset = 0;
     }
+    boolean isEvictCache = isRefresh;
+    if (isRefresh && isFirst) {
+      isFirst = false;
+      isEvictCache = false;
+    }
     compositeSubscription.add(
-        model.getTopicReplies(id, offset)
+        model.getTopicReplies(id, offset, isEvictCache)
             .subscribeOn(Schedulers.io())
             .retryWhen(new RetryWithDelay(3, 2))
             .doOnSubscribe(new Action0() {

@@ -1,6 +1,6 @@
 package com.example.bill.epsilon.ui.user.SignIn;
 
-import com.example.bill.epsilon.api.UserService;
+import com.example.bill.epsilon.api.server.UserService;
 import com.example.bill.epsilon.internal.di.scope.PerActivity;
 import com.example.bill.epsilon.ui.user.SignIn.SignInMVP.View;
 import dagger.Module;

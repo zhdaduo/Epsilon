@@ -1,6 +1,6 @@
 package com.example.bill.epsilon.ui.topic.TopicList;
 
-import com.example.bill.epsilon.api.TopicService;
+import com.example.bill.epsilon.api.server.TopicService;
 import com.example.bill.epsilon.internal.di.scope.PerFragment;
 import com.example.bill.epsilon.ui.topic.TopicList.TopicListMVP.View;
 import dagger.Module;

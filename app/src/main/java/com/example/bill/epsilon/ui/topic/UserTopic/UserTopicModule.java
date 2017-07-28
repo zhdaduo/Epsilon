@@ -1,7 +1,7 @@
 package com.example.bill.epsilon.ui.topic.UserTopic;
 
-import com.example.bill.epsilon.api.TopicService;
-import com.example.bill.epsilon.api.UserService;
+import com.example.bill.epsilon.api.server.TopicService;
+import com.example.bill.epsilon.api.server.UserService;
 import com.example.bill.epsilon.internal.di.scope.PerFragment;
 import com.example.bill.epsilon.ui.topic.UserTopic.UserTopicMVP.View;
 import dagger.Module;

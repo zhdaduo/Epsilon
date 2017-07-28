@@ -35,6 +35,6 @@ public interface NewsMVP {
 
   interface Model {
 
-    Observable<List<News>> getNews(int offset);
+    Observable<List<News>> getNews(int offset, boolean update);
   }
 }

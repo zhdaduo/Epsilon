@@ -1,6 +1,6 @@
 package com.example.bill.epsilon.ui.notification;
 
-import com.example.bill.epsilon.api.NotificationService;
+import com.example.bill.epsilon.api.server.NotificationService;
 import com.example.bill.epsilon.internal.di.scope.PerActivity;
 import com.example.bill.epsilon.ui.notification.NotificationMVP.View;
 import dagger.Module;

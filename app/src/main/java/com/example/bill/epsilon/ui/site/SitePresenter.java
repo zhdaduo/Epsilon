@@ -28,6 +28,7 @@ public class SitePresenter implements SiteMVP.Presenter {
 
   private List<Site> mList = new ArrayList<>();
   private int offset = 0;
+  private boolean isFirst = true;
   private CompositeSubscription compositeSubscription;
   private SiteMVP.Model model;
   private SiteMVP.View view;
@@ -61,8 +62,13 @@ public class SitePresenter implements SiteMVP.Presenter {
     if (isRefresh) {
       offset = 0;
     }
+    boolean isEvictCache = isRefresh;
+    if (isRefresh && isFirst) {
+      isFirst = false;
+      isEvictCache = false;
+    }
     compositeSubscription.add(
-        model.getSite(offset)
+        model.getSite(offset, isEvictCache)
             .subscribeOn(Schedulers.io())
             .retryWhen(new RetryWithDelay(3, 2))
             .doOnSubscribe(new Action0() {

@@ -3,10 +3,13 @@ package com.example.bill.epsilon.internal.di.module;
 import android.app.Application;
 import android.content.Context;
 import com.example.bill.epsilon.AndroidApplication;
+import com.example.bill.epsilon.api.cache.CacheProviders;
 import com.example.bill.epsilon.navigation.Navigator;
 import com.example.bill.epsilon.util.Constant;
 import dagger.Module;
 import dagger.Provides;
+import io.rx_cache.internal.RxCache;
+import io.victoralbertos.jolyglot.GsonSpeaker;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Named;
@@ -137,5 +140,15 @@ public class ApplicationModule {
   @Provides
   Navigator provideNavigator(Context context) {
     return new Navigator(context);
+  }
+
+  @Singleton
+  @Provides
+  CacheProviders provideCacheProviders() {
+
+    RxCache.Builder builder = new RxCache.Builder().useExpiredDataIfLoaderNotAvailable(true);
+
+    return builder.persistence(application.getCacheDir(), new GsonSpeaker())
+        .using(CacheProviders.class);
   }
 }

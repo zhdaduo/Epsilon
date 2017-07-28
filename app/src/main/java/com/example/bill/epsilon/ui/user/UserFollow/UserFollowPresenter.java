@@ -41,6 +41,7 @@ public class UserFollowPresenter implements UserFollowMVP.Presenter {
 
   private List<UserInfo> mList = new ArrayList<>();
   private int offset = 0;
+  private boolean isFirst = true;
   private CompositeSubscription compositeSubscription;
   private UserFollowMVP.Model model;
   private UserFollowMVP.View view;
@@ -106,8 +107,13 @@ public class UserFollowPresenter implements UserFollowMVP.Presenter {
     if (isRefresh) {
       offset = 0;
     }
+    boolean isEvictCache = isRefresh;
+    if (isRefresh && isFirst) {
+      isFirst = false;
+      isEvictCache = false;
+    }
     compositeSubscription.add(
-        model.getFollowings(username, offset)
+        model.getFollowings(username, offset, isEvictCache)
             .retryWhen(new RetryWithDelay(3, 2))
             .doOnSubscribe(new Action0() {
               @Override

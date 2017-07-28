@@ -1,6 +1,6 @@
 package com.example.bill.epsilon.ui.user.UserFollow;
 
-import com.example.bill.epsilon.api.UserService;
+import com.example.bill.epsilon.api.server.UserService;
 import com.example.bill.epsilon.internal.di.scope.PerFragment;
 import com.example.bill.epsilon.ui.user.UserFollow.UserFollowMVP.View;
 import dagger.Module;

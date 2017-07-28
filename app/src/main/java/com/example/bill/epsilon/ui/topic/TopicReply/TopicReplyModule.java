@@ -1,6 +1,6 @@
 package com.example.bill.epsilon.ui.topic.TopicReply;
 
-import com.example.bill.epsilon.api.TopicService;
+import com.example.bill.epsilon.api.server.TopicService;
 import com.example.bill.epsilon.internal.di.scope.PerActivity;
 import com.example.bill.epsilon.ui.topic.TopicReply.TopicReplyMVP.View;
 import dagger.Module;

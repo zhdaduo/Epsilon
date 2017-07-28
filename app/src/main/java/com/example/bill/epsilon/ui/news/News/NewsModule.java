@@ -1,6 +1,6 @@
 package com.example.bill.epsilon.ui.news.News;
 
-import com.example.bill.epsilon.api.NewsService;
+import com.example.bill.epsilon.api.server.NewsService;
 import com.example.bill.epsilon.internal.di.scope.PerFragment;
 import com.example.bill.epsilon.ui.news.News.NewsMVP.View;
 import dagger.Module;
