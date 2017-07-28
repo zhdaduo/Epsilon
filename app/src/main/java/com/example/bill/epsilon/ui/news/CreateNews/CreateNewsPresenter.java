@@ -68,6 +68,7 @@ public class CreateNewsPresenter implements CreateNewsMVP.Presenter {
   public void getNewsNodes() {
     model.getNewsNodes()
         .compose(RxUtil.<List<NewsNode>>shortSchedulers())
+        .compose(RxUtil.<List<NewsNode>>bindToLifecycle(view))
         .subscribe(new ErrorHandleSubscriber<List<NewsNode>>(mErrorHandler) {
           @Override
           public void onNext(@NonNull List<NewsNode> data) {
