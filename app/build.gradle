@@ -89,6 +89,8 @@ dependencies {
     compile rootProject.ext.dependencies["pgyersdk"]
     compile rootProject.ext.dependencies["RxCache"]
     compile rootProject.ext.dependencies["RxCache-gson"]
+    compile rootProject.ext.dependencies["rxlifecycle"]
+    compile rootProject.ext.dependencies["rxlifecycle-components"]
     testCompile rootProject.ext.dependencies["junit"]
 
 }

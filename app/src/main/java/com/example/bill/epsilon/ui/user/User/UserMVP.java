@@ -12,7 +12,7 @@ import rx.Observable;
 
 public interface UserMVP {
 
-  interface View {
+  interface View extends IView{
 
     void onGetUserInfo(UserDetailInfo user);
 

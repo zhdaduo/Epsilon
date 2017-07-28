@@ -20,6 +20,7 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.example.bill.epsilon.AndroidApplication;
 import com.example.bill.epsilon.R;
 import com.example.bill.epsilon.navigation.Navigator;
+import com.example.bill.epsilon.ui.base.BaseActivity;
 import com.example.bill.epsilon.view.adapter.TopicReplyAdapter;
 import com.example.bill.epsilon.view.widget.loadmore.LoadMoreFooter.OnClickReloadListener;
 import com.example.bill.epsilon.view.widget.loadmore.LoadMoreListener;
@@ -34,7 +35,7 @@ import rx.subscriptions.CompositeSubscription;
  * Created by Bill on 2017/7/20.
  */
 
-public class TopicReplyActivity extends AppCompatActivity implements TopicReplyMVP.View
+public class TopicReplyActivity extends BaseActivity implements TopicReplyMVP.View
     , SwipeRefreshLayout.OnRefreshListener {
 
   public static final String TOPICID = "topicID";
@@ -183,6 +184,11 @@ public class TopicReplyActivity extends AppCompatActivity implements TopicReplyM
   public void onReplyRefresh() {
     presenter.getTopicReplies(id, true);
     mRecyclerView.setCanloadMore(true);
+  }
+
+  @Override
+  public boolean isSupportSwipeBack() {
+    return false;
   }
 
   @Override

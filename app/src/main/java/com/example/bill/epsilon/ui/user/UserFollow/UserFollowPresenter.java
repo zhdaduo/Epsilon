@@ -17,6 +17,7 @@ import com.example.bill.epsilon.ui.user.UserFollow.UserFollowMVP.Model;
 import com.example.bill.epsilon.ui.user.UserFollow.UserFollowMVP.View;
 import com.example.bill.epsilon.util.Constant;
 import com.example.bill.epsilon.util.PrefUtil;
+import com.example.bill.epsilon.util.RxUtil;
 import com.example.bill.epsilon.view.adapter.UserAdapter;
 import com.example.bill.epsilon.view.listener.IUserListener;
 import java.util.ArrayList;
@@ -42,7 +43,6 @@ public class UserFollowPresenter implements UserFollowMVP.Presenter {
   private List<UserInfo> mList = new ArrayList<>();
   private int offset = 0;
   private boolean isFirst = true;
-  private CompositeSubscription compositeSubscription;
   private UserFollowMVP.Model model;
   private UserFollowMVP.View view;
   private RxErrorHandler mErrorHandler;
@@ -56,7 +56,6 @@ public class UserFollowPresenter implements UserFollowMVP.Presenter {
     this.view = view;
     this.mErrorHandler = handler;
     this.navigator = navigator;
-    compositeSubscription = new CompositeSubscription();
   }
 
   public void initAdapter(final String username) {
@@ -112,26 +111,9 @@ public class UserFollowPresenter implements UserFollowMVP.Presenter {
       isFirst = false;
       isEvictCache = false;
     }
-    compositeSubscription.add(
         model.getFollowings(username, offset, isEvictCache)
-            .retryWhen(new RetryWithDelay(3, 2))
-            .doOnSubscribe(new Action0() {
-              @Override
-              public void call() {
-                if (isRefresh) {
-                  view.showLoading();
-                }
-              }
-            }).subscribeOn(AndroidSchedulers.mainThread())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doAfterTerminate(new Action0() {
-              @Override
-              public void call() {
-                if (isRefresh) {
-                  view.hideLoading();
-                }
-              }
-            })
+            .compose(RxUtil.<List<UserInfo>>booleanSchedulers(view, isRefresh))
+            .compose(RxUtil.<List<UserInfo>>bindToLifecycle(view))
             .subscribe(new ErrorHandleSubscriber<List<UserInfo>>(mErrorHandler) {
               @Override
               public void onError(@NonNull Throwable e) {
@@ -153,16 +135,13 @@ public class UserFollowPresenter implements UserFollowMVP.Presenter {
                 }
                 view.setEmpty(mList.isEmpty());
               }
-            })
-    );
+            });
   }
 
   public void followUser(final UserInfo user) {
-    compositeSubscription.add(
         model.followUser(user.getLogin())
-            .subscribeOn(Schedulers.io())
-            .retryWhen(new RetryWithDelay(3, 2))
-            .observeOn(AndroidSchedulers.mainThread())
+            .compose(RxUtil.<Ok>shortSchedulers())
+            .compose(RxUtil.<Ok>bindToLifecycle(view))
             .subscribe(new ErrorHandleSubscriber<Ok>(mErrorHandler) {
               @Override
               public void onError(@NonNull Throwable e) {
@@ -177,16 +156,13 @@ public class UserFollowPresenter implements UserFollowMVP.Presenter {
                 EventBus.getDefault().post(new UnFollowUserEvent());
                 ToastUtils.showShort("已关注");
               }
-            })
-    );
+            });
   }
 
   public void unfollowUser(final UserInfo user) {
-    compositeSubscription.add(
         model.unfollowUser(user.getLogin())
-            .subscribeOn(Schedulers.io())
-            .retryWhen(new RetryWithDelay(3, 2))
-            .observeOn(AndroidSchedulers.mainThread())
+            .compose(RxUtil.<Ok>shortSchedulers())
+            .compose(RxUtil.<Ok>bindToLifecycle(view))
             .subscribe(new ErrorHandleSubscriber<Ok>(mErrorHandler) {
               @Override
               public void onError(@NonNull Throwable e) {
@@ -202,13 +178,11 @@ public class UserFollowPresenter implements UserFollowMVP.Presenter {
                 adapter.notifyDataSetChanged();
                 view.setEmpty(mList.isEmpty());
               }
-            })
-    );
+            });
   }
 
   @Override
   public void onDestroy() {
-    compositeSubscription.clear();
     adapter = null;
     view = null;
     mList = null;

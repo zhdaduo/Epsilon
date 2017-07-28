@@ -247,4 +247,19 @@ public class UserActivity extends BaseActivity implements UserMVP.View {
       mUnbinder.unbind();
     this.mUnbinder = null;
   }
+
+  @Override
+  public void showLoading() {
+
+  }
+
+  @Override
+  public void hideLoading() {
+
+  }
+
+  @Override
+  public void showMessage(String message) {
+
+  }
 }

@@ -8,6 +8,7 @@ import com.example.bill.epsilon.navigation.Navigator;
 import com.example.bill.epsilon.ui.news.News.NewsMVP.Model;
 import com.example.bill.epsilon.ui.news.News.NewsMVP.View;
 import com.example.bill.epsilon.util.Constant;
+import com.example.bill.epsilon.util.RxUtil;
 import com.example.bill.epsilon.view.adapter.NewsAdapter;
 import com.example.bill.epsilon.view.listener.INewsListener;
 import java.util.ArrayList;
@@ -33,7 +34,6 @@ public class NewsPresenter implements NewsMVP.Presenter {
   private List<News> mList = new ArrayList<>();
   private int offset = 0;
   private boolean isFirst = true;
-  private CompositeSubscription compositeSubscription;
   private NewsMVP.Model model;
   private NewsMVP.View view;
   private RxErrorHandler mErrorHandler;
@@ -47,7 +47,6 @@ public class NewsPresenter implements NewsMVP.Presenter {
     this.view = view;
     this.mErrorHandler = handler;
     this.navigator = navigator;
-    compositeSubscription = new CompositeSubscription();
   }
 
   public void initAdapter() {
@@ -75,28 +74,9 @@ public class NewsPresenter implements NewsMVP.Presenter {
       isFirst = false;
       isEvictCache = false;
     }
-    compositeSubscription.add(
         model.getNews(offset, isEvictCache)
-            .subscribeOn(Schedulers.io())
-            .retryWhen(new RetryWithDelay(3, 2))
-            .doOnSubscribe(new Action0() {
-              @Override
-              public void call() {
-                if (isRefresh) {
-                  view.showLoading();
-                }
-              }
-            })
-            .subscribeOn(AndroidSchedulers.mainThread())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doAfterTerminate(new Action0() {
-              @Override
-              public void call() {
-                if (isRefresh) {
-                  view.hideLoading();
-                }
-              }
-            })
+            .compose(RxUtil.<List<News>>booleanSchedulers(view, isRefresh))
+            .compose(RxUtil.<List<News>>bindToLifecycle(view))
             .subscribe(new ErrorHandleSubscriber<List<News>>(mErrorHandler) {
               @Override
               public void onError(@NonNull Throwable e) {
@@ -117,13 +97,11 @@ public class NewsPresenter implements NewsMVP.Presenter {
                   view.onLoadMoreEnd();
                 }
               }
-            })
-    );
+            });
   }
 
   @Override
   public void onDestroy() {
-    compositeSubscription.clear();
     adapter = null;
     view = null;
     mList = null;

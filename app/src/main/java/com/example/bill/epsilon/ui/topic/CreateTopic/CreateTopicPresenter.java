@@ -11,6 +11,7 @@ import com.example.bill.epsilon.ui.topic.CreateTopic.CreateTopicMVP.Model;
 import com.example.bill.epsilon.ui.topic.CreateTopic.CreateTopicMVP.View;
 import com.example.bill.epsilon.util.Constant;
 import com.example.bill.epsilon.util.PrefUtil;
+import com.example.bill.epsilon.util.RxUtil;
 import com.google.gson.GsonBuilder;
 import java.util.List;
 import javax.inject.Inject;
@@ -29,7 +30,6 @@ import rx.subscriptions.CompositeSubscription;
 @PerActivity
 public class CreateTopicPresenter implements CreateTopicMVP.Presenter {
 
-  private CompositeSubscription compositeSubscription;
   private CreateTopicMVP.Model model;
   private CreateTopicMVP.View view;
   private RxErrorHandler mErrorHandler;
@@ -42,28 +42,12 @@ public class CreateTopicPresenter implements CreateTopicMVP.Presenter {
     this.view = view;
     this.context = context;
     this.mErrorHandler = handler;
-    compositeSubscription = new CompositeSubscription();
   }
 
   public void createTopic(String title, String body, int nodeId) {
-    compositeSubscription.add(
     model.createTopic(title, body, nodeId)
-        .subscribeOn(Schedulers.io())
-        .retryWhen(new RetryWithDelay(3, 2))
-        .doOnSubscribe(new Action0() {
-          @Override
-          public void call() {
-            view.showLoading();
-          }
-        })
-        .subscribeOn(AndroidSchedulers.mainThread())
-        .observeOn(AndroidSchedulers.mainThread())
-        .doAfterTerminate(new Action0() {
-          @Override
-          public void call() {
-            view.hideLoading();
-          }
-        })
+        .compose(RxUtil.<TopicDetail>applySchedulers(view))
+        .compose(RxUtil.<TopicDetail>bindToLifecycle(view))
         .subscribe(new ErrorHandleSubscriber<TopicDetail>(mErrorHandler) {
           @Override
           public void onError(@NonNull Throwable e) {
@@ -78,16 +62,12 @@ public class CreateTopicPresenter implements CreateTopicMVP.Presenter {
             view.showNewTopic(topic);
             view.finishActivity();
           }
-        })
-    );
+        });
   }
 
   public void getNodes() {
-    compositeSubscription.add(
         model.getNodes()
-            .subscribeOn(Schedulers.io())
-            .retryWhen(new RetryWithDelay(3, 2))
-            .observeOn(AndroidSchedulers.mainThread())
+            .compose(RxUtil.<List<Node>>shortSchedulers())
             .subscribe(new ErrorHandleSubscriber<List<Node>>(mErrorHandler) {
               @Override
               public void onNext(@NonNull List<Node> data) {
@@ -97,13 +77,11 @@ public class CreateTopicPresenter implements CreateTopicMVP.Presenter {
                 PrefUtil.getInstance(context, Constant.Token.SHARED_PREFERENCES_NAME)
                     .putString("topic_nodes", builder.create().toJson(data));
               }
-            })
-    );
+            });
   }
 
   @Override
   public void onDestroy() {
-    compositeSubscription.clear();
     mErrorHandler = null;
     view = null;
   }

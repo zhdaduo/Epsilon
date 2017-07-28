@@ -7,6 +7,7 @@ import com.example.bill.epsilon.navigation.Navigator;
 import com.example.bill.epsilon.ui.site.SiteMVP.Model;
 import com.example.bill.epsilon.ui.site.SiteMVP.View;
 import com.example.bill.epsilon.util.Constant;
+import com.example.bill.epsilon.util.RxUtil;
 import com.example.bill.epsilon.view.adapter.SiteAdapter;
 import com.example.bill.epsilon.view.listener.ISiteListener;
 import java.util.ArrayList;
@@ -29,7 +30,6 @@ public class SitePresenter implements SiteMVP.Presenter {
   private List<Site> mList = new ArrayList<>();
   private int offset = 0;
   private boolean isFirst = true;
-  private CompositeSubscription compositeSubscription;
   private SiteMVP.Model model;
   private SiteMVP.View view;
   private RxErrorHandler mErrorHandler;
@@ -43,7 +43,6 @@ public class SitePresenter implements SiteMVP.Presenter {
     this.view = view;
     this.mErrorHandler = handler;
     this.navigator = navigator;
-    compositeSubscription = new CompositeSubscription();
   }
 
   public void initAdapter() {
@@ -67,28 +66,9 @@ public class SitePresenter implements SiteMVP.Presenter {
       isFirst = false;
       isEvictCache = false;
     }
-    compositeSubscription.add(
         model.getSite(offset, isEvictCache)
-            .subscribeOn(Schedulers.io())
-            .retryWhen(new RetryWithDelay(3, 2))
-            .doOnSubscribe(new Action0() {
-              @Override
-              public void call() {
-                if (isRefresh) {
-                  view.showLoading();
-                }
-              }
-            })
-            .subscribeOn(AndroidSchedulers.mainThread())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doAfterTerminate(new Action0() {
-              @Override
-              public void call() {
-                if (isRefresh) {
-                  view.hideLoading();
-                }
-              }
-            })
+            .compose(RxUtil.<List<Site>>booleanSchedulers(view, isRefresh))
+            .compose(RxUtil.<List<Site>>bindToLifecycle(view))
             .subscribe(new ErrorHandleSubscriber<List<Site>>(mErrorHandler) {
               @Override
               public void onError(@NonNull Throwable e) {
@@ -109,13 +89,11 @@ public class SitePresenter implements SiteMVP.Presenter {
                   view.onLoadMoreEnd();
                 }
               }
-            })
-    );
+            });
   }
 
   @Override
   public void onDestroy() {
-    compositeSubscription.clear();
     adapter = null;
     view = null;
     mList = null;

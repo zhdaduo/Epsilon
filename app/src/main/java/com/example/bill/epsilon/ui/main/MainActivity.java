@@ -32,6 +32,7 @@ import com.example.bill.epsilon.R;
 import com.example.bill.epsilon.bean.user.Token;
 import com.example.bill.epsilon.bean.user.UserDetailInfo;
 import com.example.bill.epsilon.navigation.Navigator;
+import com.example.bill.epsilon.ui.base.BaseActivity;
 import com.example.bill.epsilon.ui.news.News.NewsFragment;
 import com.example.bill.epsilon.ui.site.SiteFragment;
 import com.example.bill.epsilon.ui.topic.TopicList.TopicListFragment;
@@ -41,7 +42,7 @@ import java.util.ArrayList;
 import javax.inject.Inject;
 import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends BaseActivity
     implements MainMVP.View, NavigationView.OnNavigationItemSelectedListener {
 
   private Unbinder mUnbinder;
@@ -327,5 +328,25 @@ public class MainActivity extends AppCompatActivity
       mUnbinder.unbind();
     }
     this.mUnbinder = null;
+  }
+
+  @Override
+  public void showLoading() {
+
+  }
+
+  @Override
+  public void hideLoading() {
+
+  }
+
+  @Override
+  public void showMessage(String message) {
+
+  }
+
+  @Override
+  public boolean isSupportSwipeBack() {
+    return false;
   }
 }

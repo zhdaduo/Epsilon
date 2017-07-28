@@ -21,6 +21,7 @@ import com.example.bill.epsilon.ui.topic.UserTopic.UserTopicMVP.Model;
 import com.example.bill.epsilon.ui.topic.UserTopic.UserTopicMVP.View;
 import com.example.bill.epsilon.util.Constant;
 import com.example.bill.epsilon.util.PrefUtil;
+import com.example.bill.epsilon.util.RxUtil;
 import com.example.bill.epsilon.view.adapter.TopicListAdapter;
 import com.example.bill.epsilon.view.listener.ITopicListListener;
 import java.util.ArrayList;
@@ -46,7 +47,6 @@ public class UserTopicPresenter implements UserTopicMVP.Presenter {
 
   private List<Topic> mList = new ArrayList<>();
   private int offset = 0;
-  private CompositeSubscription compositeSubscription;
   private UserTopicMVP.Model model;
   private UserTopicMVP.View view;
   private RxErrorHandler mErrorHandler;
@@ -60,7 +60,6 @@ public class UserTopicPresenter implements UserTopicMVP.Presenter {
     this.view = view;
     this.mErrorHandler = handler;
     this.navigator = navigator;
-    compositeSubscription = new CompositeSubscription();
   }
 
   public void initAdapter(final int topicType, final String username) {
@@ -138,24 +137,9 @@ public class UserTopicPresenter implements UserTopicMVP.Presenter {
         observable = model.getUserTopics(username, offset);
         break;
     }
-    compositeSubscription.add(
         observable.subscribeOn(Schedulers.io())
-            .retryWhen(new RetryWithDelay(3, 2))
-            .doOnSubscribe(new Action0() {
-              @Override
-              public void call() {
-                if (isRefresh) view.showLoading();
-              }
-            }).subscribeOn(AndroidSchedulers.mainThread())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doAfterTerminate(new Action0() {
-              @Override
-              public void call() {
-                if (isRefresh) {
-                  view.hideLoading();
-                }
-              }
-            })
+            .compose(RxUtil.<List<Topic>>booleanSchedulers(view, isRefresh))
+            .compose(RxUtil.<List<Topic>>bindToLifecycle(view))
             .subscribe(new ErrorHandleSubscriber<List<Topic>>(mErrorHandler) {
               @Override
               public void onError(@NonNull Throwable e) {
@@ -173,16 +157,13 @@ public class UserTopicPresenter implements UserTopicMVP.Presenter {
                 if (data.size() < Constant.PAGE_SIZE) view.onLoadMoreEnd();
                 view.setEmpty(mList.isEmpty());
               }
-            })
-    );
+            });
   }
 
   public void favoriteTopic(final Topic topic) {
-    compositeSubscription.add(
     model.favoriteTopic(topic.getId())
-        .subscribeOn(Schedulers.io())
-        .retryWhen(new RetryWithDelay(3, 2))
-        .observeOn(AndroidSchedulers.mainThread())
+        .compose(RxUtil.<Ok>shortSchedulers())
+        .compose(RxUtil.<Ok>bindToLifecycle(view))
         .subscribe(new ErrorHandleSubscriber<Ok>(mErrorHandler) {
           @Override
           public void onError(@NonNull Throwable e) {
@@ -197,16 +178,13 @@ public class UserTopicPresenter implements UserTopicMVP.Presenter {
             EventBus.getDefault().post(new UnFavoriteTopicEvent());
             view.onFavoriteSuccess();
           }
-        })
-    );
+        });
   }
 
   private void unfavoriteTopic(final Topic topic) {
-    compositeSubscription.add(
     model.unfavoriteTopic(topic.getId())
-        .subscribeOn(Schedulers.io())
-        .retryWhen(new RetryWithDelay(3, 2))
-        .observeOn(AndroidSchedulers.mainThread())
+        .compose(RxUtil.<Ok>shortSchedulers())
+        .compose(RxUtil.<Ok>bindToLifecycle(view))
         .subscribe(new ErrorHandleSubscriber<Ok>(mErrorHandler) {
           @Override
           public void onError(@NonNull Throwable e) {
@@ -222,13 +200,11 @@ public class UserTopicPresenter implements UserTopicMVP.Presenter {
             adapter.notifyDataSetChanged();
             view.setEmpty(mList.isEmpty());
           }
-        })
-    );
+        });
   }
 
   @Override
   public void onDestroy() {
-    compositeSubscription.clear();
     adapter = null;
     view = null;
     mList = null;

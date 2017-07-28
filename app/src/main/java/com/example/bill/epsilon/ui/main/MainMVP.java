@@ -2,6 +2,7 @@ package com.example.bill.epsilon.ui.main;
 
 import com.example.bill.epsilon.bean.event.NotificationsUnreadCount;
 import com.example.bill.epsilon.ui.base.IPresenter;
+import com.example.bill.epsilon.ui.base.IView;
 import rx.Observable;
 
 /**
@@ -10,7 +11,7 @@ import rx.Observable;
 
 public interface MainMVP {
 
-  interface View {
+  interface View extends IView {
 
     void onLoginSuccess();
 

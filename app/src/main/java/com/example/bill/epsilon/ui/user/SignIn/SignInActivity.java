@@ -22,6 +22,7 @@ import com.example.bill.epsilon.AndroidApplication;
 import com.example.bill.epsilon.R;
 import com.example.bill.epsilon.bean.event.LoginEvent;
 import com.example.bill.epsilon.navigation.Navigator;
+import com.example.bill.epsilon.ui.base.BaseActivity;
 import javax.inject.Inject;
 import me.jessyan.rxerrorhandler.core.RxErrorHandler;
 import org.greenrobot.eventbus.EventBus;
@@ -30,11 +31,8 @@ import org.greenrobot.eventbus.EventBus;
  * Created by Bill on 2017/7/19.
  */
 
-public class SignInActivity extends AppCompatActivity implements SignInMVP.View {
+public class SignInActivity extends BaseActivity implements SignInMVP.View {
 
-  public static final int REQUEST_CODE = 1;
-  public static final int RESULT_OK = 200;
-  public static final int RESULT_ERROR = 401;
   private MaterialDialog mDialog;
   private Unbinder mUnbinder;
 

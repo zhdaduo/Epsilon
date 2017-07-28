@@ -9,6 +9,7 @@ import com.example.bill.epsilon.ui.topic.TopicReply.TopicReplyMVP.Model;
 import com.example.bill.epsilon.ui.topic.TopicReply.TopicReplyMVP.View;
 import com.example.bill.epsilon.util.Constant;
 import com.example.bill.epsilon.util.PrefUtil;
+import com.example.bill.epsilon.util.RxUtil;
 import com.example.bill.epsilon.util.html.HtmlUtils.Callback;
 import com.example.bill.epsilon.view.adapter.TopicReplyAdapter;
 import com.example.bill.epsilon.view.adapter.TopicReplyAdapter.OnItemClickListener;
@@ -33,7 +34,6 @@ import rx.subscriptions.CompositeSubscription;
 public class TopicReplyPresenter implements TopicReplyMVP.Presenter {
 
   private List<TopicReply> mList = new ArrayList<>();
-  private CompositeSubscription compositeSubscription;
   private TopicReplyAdapter adapter;
   private TopicReplyMVP.Model model;
   private TopicReplyMVP.View view;
@@ -49,7 +49,6 @@ public class TopicReplyPresenter implements TopicReplyMVP.Presenter {
     this.view = view;
     this.mErrorHandler = handler;
     this.navigator = navigator;
-    compositeSubscription = new CompositeSubscription();
   }
 
   public void initAdapter(final String title) {
@@ -121,28 +120,9 @@ public class TopicReplyPresenter implements TopicReplyMVP.Presenter {
       isFirst = false;
       isEvictCache = false;
     }
-    compositeSubscription.add(
         model.getTopicReplies(id, offset, isEvictCache)
-            .subscribeOn(Schedulers.io())
-            .retryWhen(new RetryWithDelay(3, 2))
-            .doOnSubscribe(new Action0() {
-              @Override
-              public void call() {
-                if (isRefresh) {
-                  view.showLoading();
-                }
-              }
-            })
-            .subscribeOn(AndroidSchedulers.mainThread())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doAfterTerminate(new Action0() {
-              @Override
-              public void call() {
-                if (isRefresh) {
-                  view.hideLoading();
-                }
-              }
-            })
+            .compose(RxUtil.<List<TopicReply>>booleanSchedulers(view, isRefresh))
+            .compose(RxUtil.<List<TopicReply>>bindToLifecycle(view))
             .subscribe(new ErrorHandleSubscriber<List<TopicReply>>(mErrorHandler) {
               @Override
               public void onNext(List<TopicReply> data) {
@@ -164,13 +144,11 @@ public class TopicReplyPresenter implements TopicReplyMVP.Presenter {
                 super.onError(e);
                 view.onLoadMoreError();
               }
-            })
-    );
+            });
   }
 
   @Override
   public void onDestroy() {
-    compositeSubscription.clear();
     adapter = null;
     mList = null;
     mErrorHandler = null;

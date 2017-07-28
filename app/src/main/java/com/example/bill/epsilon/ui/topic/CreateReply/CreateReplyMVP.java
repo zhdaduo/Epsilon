@@ -3,6 +3,7 @@ package com.example.bill.epsilon.ui.topic.CreateReply;
 import com.example.bill.epsilon.bean.base.Ok;
 import com.example.bill.epsilon.bean.topic.TopicReply;
 import com.example.bill.epsilon.ui.base.IPresenter;
+import com.example.bill.epsilon.ui.base.IView;
 import rx.Observable;
 
 /**
@@ -11,11 +12,7 @@ import rx.Observable;
 
 public interface CreateReplyMVP {
 
-  interface View  {
-
-    void showLoading();
-
-    void hideLoading();
+  interface View extends IView{
 
     void onGetReply(String body);
 

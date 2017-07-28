@@ -21,6 +21,7 @@ import com.example.bill.epsilon.ui.topic.TopicList.TopicListMVP.Model;
 import com.example.bill.epsilon.ui.topic.TopicList.TopicListMVP.View;
 import com.example.bill.epsilon.util.Constant;
 import com.example.bill.epsilon.util.PrefUtil;
+import com.example.bill.epsilon.util.RxUtil;
 import com.example.bill.epsilon.view.adapter.TopicListAdapter;
 import com.example.bill.epsilon.view.adapter.UserTopicAdapter;
 import com.example.bill.epsilon.view.listener.ITopicListListener;
@@ -47,7 +48,6 @@ public class TopicListPresenter implements TopicListMVP.Presenter {
   private List<Topic> mList = new ArrayList<>();
   private int offset = 0;
   private boolean isFirst = true;
-  private CompositeSubscription compositeSubscription;
   private TopicListMVP.Model model;
   private TopicListMVP.View view;
   private RxErrorHandler mErrorHandler;
@@ -62,7 +62,6 @@ public class TopicListPresenter implements TopicListMVP.Presenter {
     this.view = view;
     this.mErrorHandler = handler;
     this.navigator = navigator;
-    compositeSubscription = new CompositeSubscription();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN) public void onCreteTopicRefresh(CreateTopicEvent event) {
@@ -111,28 +110,9 @@ public class TopicListPresenter implements TopicListMVP.Presenter {
             isFirst = false;
             isEvictCache = false;
         }
-    compositeSubscription.add(
     model.getTopics(offset, isEvictCache)
-        .subscribeOn(Schedulers.io())
-        .retryWhen(new RetryWithDelay(3, 2))
-        .doOnSubscribe(new Action0() {
-          @Override
-          public void call() {
-            if (isRefresh) {
-              view.showLoading();
-            }
-          }
-        })
-        .subscribeOn(AndroidSchedulers.mainThread())
-        .observeOn(AndroidSchedulers.mainThread())
-        .doAfterTerminate(new Action0() {
-          @Override
-          public void call() {
-            if (isRefresh) {
-              view.hideLoading();
-            }
-          }
-        })
+        .compose(RxUtil.<List<Topic>>booleanSchedulers(view, isRefresh))
+        .compose(RxUtil.<List<Topic>>bindToLifecycle(view))
         .subscribe(new ErrorHandleSubscriber<List<Topic>>(mErrorHandler) {
           @Override
           public void onNext(List<Topic> topics) {
@@ -158,16 +138,13 @@ public class TopicListPresenter implements TopicListMVP.Presenter {
             super.onError(e);
             view.onLoadMoreError();
           }
-        })
-     );
+        });
   }
 
   public void getTopTopics() {
-    compositeSubscription.add(
         model.getTopTopics()
-        .subscribeOn(Schedulers.io())
-        .retryWhen(new RetryWithDelay(3, 2))
-        .observeOn(AndroidSchedulers.mainThread())
+        .compose(RxUtil.<List<Topic>>shortSchedulers())
+        .compose(RxUtil.<List<Topic>>bindToLifecycle(view))
         .subscribe(new ErrorHandleSubscriber<List<Topic>>(mErrorHandler) {
           @Override
           public void onError(Throwable e) {
@@ -178,16 +155,13 @@ public class TopicListPresenter implements TopicListMVP.Presenter {
           public void onNext(List<Topic> topics) {
             topList.addAll(topics);
           }
-        })
-    );
+        });
   }
 
   public void favoriteTopic(int id) {
-    compositeSubscription.add(
     model.favoriteTopic(id)
-        .subscribeOn(Schedulers.io())
-        .retryWhen(new RetryWithDelay(3, 2))
-        .observeOn(AndroidSchedulers.mainThread())
+        .compose(RxUtil.<Ok>shortSchedulers())
+        .compose(RxUtil.<Ok>bindToLifecycle(view))
         .subscribe(new ErrorHandleSubscriber<Ok>(mErrorHandler) {
           @Override
           public void onError(@NonNull Throwable e) {
@@ -199,13 +173,11 @@ public class TopicListPresenter implements TopicListMVP.Presenter {
           public void onNext(@NonNull Ok ok) {
             view.onFavoriteSuccess();
           }
-        })
-     );
+        });
   }
 
   @Override
   public void onDestroy() {
-    compositeSubscription.clear();
     adapter = null;
     view = null;
     mList = null;

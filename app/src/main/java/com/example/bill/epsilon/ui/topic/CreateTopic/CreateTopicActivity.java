@@ -29,6 +29,7 @@ import com.example.bill.epsilon.bean.newsnode.NewsNode;
 import com.example.bill.epsilon.bean.topic.TopicDetail;
 import com.example.bill.epsilon.bean.topicnode.Node;
 import com.example.bill.epsilon.navigation.Navigator;
+import com.example.bill.epsilon.ui.base.BaseActivity;
 import com.example.bill.epsilon.util.Constant;
 import com.example.bill.epsilon.util.PrefUtil;
 import com.google.gson.GsonBuilder;
@@ -43,7 +44,7 @@ import javax.inject.Inject;
  * Created by Bill on 2017/7/20.
  */
 
-public class CreateTopicActivity extends AppCompatActivity implements CreateTopicMVP.View {
+public class CreateTopicActivity extends BaseActivity implements CreateTopicMVP.View {
 
   private Unbinder mUnbinder;
   private MaterialDialog mDialog;
@@ -208,6 +209,11 @@ public class CreateTopicActivity extends AppCompatActivity implements CreateTopi
   @Override
   public void finishActivity() {
     finish();
+  }
+
+  @Override
+  public boolean isSupportSwipeBack() {
+    return false;
   }
 
   @Override

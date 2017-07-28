@@ -13,6 +13,7 @@ import com.example.bill.epsilon.internal.di.scope.PerActivity;
 import com.example.bill.epsilon.ui.user.SignIn.SignInMVP.Model;
 import com.example.bill.epsilon.ui.user.SignIn.SignInMVP.View;
 import com.example.bill.epsilon.util.PrefUtil;
+import com.example.bill.epsilon.util.RxUtil;
 import javax.inject.Inject;
 import me.jessyan.rxerrorhandler.core.RxErrorHandler;
 import me.jessyan.rxerrorhandler.handler.ErrorHandleSubscriber;
@@ -28,7 +29,6 @@ import rx.subscriptions.CompositeSubscription;
 @PerActivity
 public class SignInPresenter implements SignInMVP.Presenter {
 
-  private CompositeSubscription compositeSubscription;
   private SignInMVP.Model model;
   private SignInMVP.View view;
   private Application application;
@@ -43,7 +43,6 @@ public class SignInPresenter implements SignInMVP.Presenter {
     this.view = view;
     this.application = application;
     this.mErrorHandler = mErrorHandler;
-    compositeSubscription = new CompositeSubscription();
   }
 
 
@@ -59,7 +58,6 @@ public class SignInPresenter implements SignInMVP.Presenter {
   }
 
   private void getToken(final String username, String password) {
-    compositeSubscription.add(
         model.getToken(username, password)
             .subscribeOn(Schedulers.io())
             .retryWhen(new RetryWithDelay(3, 2))
@@ -71,6 +69,7 @@ public class SignInPresenter implements SignInMVP.Presenter {
             })
             .subscribeOn(AndroidSchedulers.mainThread())
             .observeOn(AndroidSchedulers.mainThread())
+            .compose(RxUtil.<Token>bindToLifecycle(view))
             .subscribe(new ErrorHandleSubscriber<Token>(mErrorHandler) {
               @Override
               public void onError(@NonNull Throwable e) {
@@ -84,16 +83,13 @@ public class SignInPresenter implements SignInMVP.Presenter {
                 PrefUtil.saveToken(application, token);
                 Login(username);
               }
-            })
-    );
+            });
   }
 
   private void Login(final String username) {
-    compositeSubscription.add(
         model.Login(username)
-            .subscribeOn(Schedulers.io())
-            .retryWhen(new RetryWithDelay(3, 2))
-            .observeOn(AndroidSchedulers.mainThread())
+            .compose(RxUtil.<UserDetailInfo>shortSchedulers())
+            .compose(RxUtil.<UserDetailInfo>bindToLifecycle(view))
             .doAfterTerminate(new Action0() {
               @Override
               public void call() {
@@ -112,13 +108,11 @@ public class SignInPresenter implements SignInMVP.Presenter {
                 PrefUtil.saveMe(application, user);
                 view.loginSuccess(username);
               }
-            })
-    );
+            });
   }
 
   @Override
   public void onDestroy() {
-    compositeSubscription.clear();
     view = null;
     mErrorHandler = null;
   }

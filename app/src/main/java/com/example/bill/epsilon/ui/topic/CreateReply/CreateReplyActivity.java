@@ -169,6 +169,11 @@ public class CreateReplyActivity extends AppCompatActivity implements CreateRepl
   }
 
   @Override
+  public void showMessage(String message) {
+
+  }
+
+  @Override
   public void onGetReply(String bodyhtml) {
     body.setText(HtmlUtil.removeP(bodyhtml));
     body.setSelection(bodyhtml.length());

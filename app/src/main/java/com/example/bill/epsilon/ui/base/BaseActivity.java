@@ -4,12 +4,13 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import cn.bingoogolapple.swipebacklayout.BGASwipeBackHelper;
+import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
 /**
  * Created by Bill on 2017/7/22.
  */
 
-public abstract class BaseActivity extends AppCompatActivity
+public abstract class BaseActivity extends RxAppCompatActivity
     implements BGASwipeBackHelper.Delegate  {
 
   protected BGASwipeBackHelper mSwipeBackHelper;

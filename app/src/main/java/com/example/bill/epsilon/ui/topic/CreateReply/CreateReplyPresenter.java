@@ -9,6 +9,7 @@ import com.example.bill.epsilon.bean.topic.TopicReply;
 import com.example.bill.epsilon.internal.di.scope.PerActivity;
 import com.example.bill.epsilon.ui.topic.CreateReply.CreateReplyMVP.Model;
 import com.example.bill.epsilon.ui.topic.CreateReply.CreateReplyMVP.View;
+import com.example.bill.epsilon.util.RxUtil;
 import javax.inject.Inject;
 import me.jessyan.rxerrorhandler.core.RxErrorHandler;
 import me.jessyan.rxerrorhandler.handler.ErrorHandleSubscriber;
@@ -42,22 +43,8 @@ public class CreateReplyPresenter implements CreateReplyMVP.Presenter {
   public void createTopicReply(int topicId, String body) {
     compositeSubscription.add(
         model.createTopicReply(topicId, body)
-            .subscribeOn(Schedulers.io())
-            .retryWhen(new RetryWithDelay(3, 2))
-            .doOnSubscribe(new Action0() {
-              @Override
-              public void call() {
-                view.showLoading();
-              }
-            })
-            .subscribeOn(AndroidSchedulers.mainThread())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doAfterTerminate(new Action0() {
-              @Override
-              public void call() {
-                view.hideLoading();
-              }
-            })
+            .compose(RxUtil.<TopicReply>applySchedulers(view))
+            .compose(RxUtil.<TopicReply>bindToLifecycle(view))
             .subscribe(new ErrorHandleSubscriber<TopicReply>(mErrorHandler) {
               @Override
               public void onError(@NonNull Throwable e) {
@@ -78,9 +65,7 @@ public class CreateReplyPresenter implements CreateReplyMVP.Presenter {
   public void getTopicReply(int id) {
     compositeSubscription.add(
         model.getTopicReply(id)
-        .subscribeOn(Schedulers.io())
-        .retryWhen(new RetryWithDelay(3, 2))
-        .observeOn(AndroidSchedulers.mainThread())
+        .compose(RxUtil.<TopicReply>shortSchedulers())
         .subscribe(new ErrorHandleSubscriber<TopicReply>(mErrorHandler) {
           @Override
           public void onError(@NonNull Throwable e) {
@@ -98,22 +83,8 @@ public class CreateReplyPresenter implements CreateReplyMVP.Presenter {
   public void updateTopicReply(int id, String body) {
     compositeSubscription.add(
         model.updateTopicReply(id, body)
-        .subscribeOn(Schedulers.io())
-        .retryWhen(new RetryWithDelay(3, 2))
-        .doOnSubscribe(new Action0() {
-          @Override
-          public void call() {
-            view.showLoading();
-          }
-        })
-        .subscribeOn(AndroidSchedulers.mainThread())
-        .observeOn(AndroidSchedulers.mainThread())
-        .doAfterTerminate(new Action0() {
-          @Override
-          public void call() {
-            view.hideLoading();
-          }
-        })
+            .compose(RxUtil.<TopicReply>applySchedulers(view))
+            .compose(RxUtil.<TopicReply>bindToLifecycle(view))
         .subscribe(new ErrorHandleSubscriber<TopicReply>(mErrorHandler) {
           @Override
           public void onError(@NonNull Throwable e) {
@@ -134,22 +105,8 @@ public class CreateReplyPresenter implements CreateReplyMVP.Presenter {
   public void deleteTopicReply(int id) {
     compositeSubscription.add(
         model.deleteTopicReply(id)
-        .subscribeOn(Schedulers.io())
-        .retryWhen(new RetryWithDelay(3, 2))
-        .doOnSubscribe(new Action0() {
-          @Override
-          public void call() {
-            view.showLoading();
-          }
-        })
-        .subscribeOn(AndroidSchedulers.mainThread())
-        .observeOn(AndroidSchedulers.mainThread())
-        .doAfterTerminate(new Action0() {
-          @Override
-          public void call() {
-            view.hideLoading();
-          }
-        })
+        .compose(RxUtil.<Ok>applySchedulers(view))
+        .compose(RxUtil.<Ok>bindToLifecycle(view))
         .subscribe(new ErrorHandleSubscriber<Ok>(mErrorHandler) {
           @Override
           public void onError(@NonNull Throwable e) {

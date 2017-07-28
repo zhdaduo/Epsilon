@@ -10,6 +10,7 @@ import com.example.bill.epsilon.internal.di.scope.PerActivity;
 import com.example.bill.epsilon.navigation.Navigator;
 import com.example.bill.epsilon.ui.topic.Topic.TopicMVP.Model;
 import com.example.bill.epsilon.ui.topic.Topic.TopicMVP.View;
+import com.example.bill.epsilon.util.RxUtil;
 import javax.inject.Inject;
 import me.jessyan.rxerrorhandler.core.RxErrorHandler;
 import me.jessyan.rxerrorhandler.handler.ErrorHandleSubscriber;
@@ -29,41 +30,22 @@ import rx.subscriptions.CompositeSubscription;
 public class TopicPresenter implements TopicMVP.Presenter {
 
   private static final String LIKE_OBJ_TYPE_TOPIC = "topic";
-  private CompositeSubscription compositeSubscription;
   private TopicMVP.Model model;
   private TopicMVP.View view;
   private RxErrorHandler mErrorHandler;
-  private Navigator navigator;
 
   @Inject
   public TopicPresenter(Model model,
-      View view, RxErrorHandler handler, Navigator navigator) {
+      View view, RxErrorHandler handler) {
     this.model = model;
     this.view = view;
     this.mErrorHandler = handler;
-    this.navigator = navigator;
-    compositeSubscription = new CompositeSubscription();
   }
 
   public void getTopicDetail(int id) {
-    compositeSubscription.add(
         model.getTopicDetail(id)
-            .subscribeOn(Schedulers.io())
-            .retryWhen(new RetryWithDelay(3, 2))
-            .doOnSubscribe(new Action0() {
-              @Override
-              public void call() {
-                view.showLoading();
-              }
-            })
-            .subscribeOn(AndroidSchedulers.mainThread())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doAfterTerminate(new Action0() {
-              @Override
-              public void call() {
-                view.hideLoading();
-              }
-            })
+            .compose(RxUtil.<TopicDetail>applySchedulers(view))
+            .compose(RxUtil.<TopicDetail>bindToLifecycle(view))
             .subscribe(new ErrorHandleSubscriber<TopicDetail>(mErrorHandler) {
               @Override
               public void onError(@NonNull Throwable e) {
@@ -76,16 +58,13 @@ public class TopicPresenter implements TopicMVP.Presenter {
                 view.setLayout(true);
                 view.onGetTopicDetail(data);
               }
-            })
-    );
+            });
   }
 
   public void favoriteTopic(int id) {
-    compositeSubscription.add(
         model.favoriteTopic(id)
-        .subscribeOn(Schedulers.io())
-        .retryWhen(new RetryWithDelay(3, 2))
-        .observeOn(AndroidSchedulers.mainThread())
+        .compose(RxUtil.<Ok>shortSchedulers())
+        .compose(RxUtil.<Ok>bindToLifecycle(view))
         .subscribe(new ErrorHandleSubscriber<Ok>(mErrorHandler) {
           @Override
           public void onError(@NonNull Throwable e) {
@@ -97,17 +76,14 @@ public class TopicPresenter implements TopicMVP.Presenter {
           public void onNext(@NonNull Ok data) {
             view.onFavoriteTopic();
           }
-        })
-    );
+        });
   }
 
   public void unfavoriteTopic(int id) {
-    compositeSubscription.add(
         model.unfavoriteTopic(id)
-        .subscribeOn(Schedulers.io())
-        .retryWhen(new RetryWithDelay(3, 2))
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new ErrorHandleSubscriber<Ok>(mErrorHandler) {
+            .compose(RxUtil.<Ok>shortSchedulers())
+            .compose(RxUtil.<Ok>bindToLifecycle(view))
+            .subscribe(new ErrorHandleSubscriber<Ok>(mErrorHandler) {
           @Override
           public void onError(@NonNull Throwable e) {
             super.onError(e);
@@ -118,17 +94,14 @@ public class TopicPresenter implements TopicMVP.Presenter {
           public void onNext(@NonNull Ok data) {
             view.onFavoriteTopic();
           }
-        })
-    );
+        });
   }
 
   public void likeTopic(Integer obj_id) {
-    compositeSubscription.add(
         model.likeTopic(LIKE_OBJ_TYPE_TOPIC, obj_id)
-        .subscribeOn(Schedulers.io())
-        .retryWhen(new RetryWithDelay(3, 2))
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new ErrorHandleSubscriber<Like>(mErrorHandler) {
+            .compose(RxUtil.<Like>shortSchedulers())
+            .compose(RxUtil.<Like>bindToLifecycle(view))
+            .subscribe(new ErrorHandleSubscriber<Like>(mErrorHandler) {
           @Override
           public void onError(@NonNull Throwable e) {
             super.onError(e);
@@ -139,17 +112,14 @@ public class TopicPresenter implements TopicMVP.Presenter {
           public void onNext(@NonNull Like data) {
             view.onLikeTopic(data);
           }
-        })
-    );
+        });
   }
 
   public void unlikeTopic(Integer obj_id) {
-    compositeSubscription.add(
         model.unlikeTopic(LIKE_OBJ_TYPE_TOPIC, obj_id)
-        .subscribeOn(Schedulers.io())
-        .retryWhen(new RetryWithDelay(3, 2))
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new ErrorHandleSubscriber<Like>(mErrorHandler) {
+            .compose(RxUtil.<Like>shortSchedulers())
+            .compose(RxUtil.<Like>bindToLifecycle(view))
+            .subscribe(new ErrorHandleSubscriber<Like>(mErrorHandler) {
           @Override
           public void onError(@NonNull Throwable e) {
             super.onError(e);
@@ -160,8 +130,7 @@ public class TopicPresenter implements TopicMVP.Presenter {
           public void onNext(@NonNull Like data) {
             view.onLikeTopic(data);
           }
-        })
-    );
+        });
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
@@ -171,7 +140,6 @@ public class TopicPresenter implements TopicMVP.Presenter {
 
   @Override
   public void onDestroy() {
-    compositeSubscription.clear();
     view = null;
     mErrorHandler = null;
   }

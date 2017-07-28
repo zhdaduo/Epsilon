@@ -15,6 +15,7 @@ import com.example.bill.epsilon.navigation.Navigator;
 import com.example.bill.epsilon.ui.notification.NotificationMVP.Model;
 import com.example.bill.epsilon.ui.notification.NotificationMVP.View;
 import com.example.bill.epsilon.util.Constant;
+import com.example.bill.epsilon.util.RxUtil;
 import com.example.bill.epsilon.util.html.HtmlUtils.Callback;
 import com.example.bill.epsilon.view.adapter.NotificationAdapter;
 import com.example.bill.epsilon.view.adapter.NotificationAdapter.OnItemClickListener;
@@ -40,7 +41,6 @@ public class NotificationPresenter implements NotificationMVP.Presenter {
   private List<Notification> mList = new ArrayList<>();
   private int offset = 0;
   private boolean isFirst = true;
-  private CompositeSubscription compositeSubscription;
   private NotificationMVP.Model model;
   private NotificationMVP.View view;
   private RxErrorHandler mErrorHandler;
@@ -54,7 +54,6 @@ public class NotificationPresenter implements NotificationMVP.Presenter {
     this.view = view;
     this.mErrorHandler = handler;
     this.navigator = navigator;
-    compositeSubscription = new CompositeSubscription();
   }
 
   public void initAdapter() {
@@ -131,28 +130,9 @@ public class NotificationPresenter implements NotificationMVP.Presenter {
       isFirst = false;
       isEvictCache = false;
     }
-    compositeSubscription.add(
         model.getNotifications(offset, isEvictCache)
-            .subscribeOn(Schedulers.io())
-            .retryWhen(new RetryWithDelay(3, 2))
-            .doOnSubscribe(new Action0() {
-              @Override
-              public void call() {
-                if (isRefresh) {
-                  view.showLoading();
-                }
-              }
-            })
-            .subscribeOn(AndroidSchedulers.mainThread())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doAfterTerminate(new Action0() {
-              @Override
-              public void call() {
-                if (isRefresh) {
-                  view.hideLoading();
-                }
-              }
-            })
+            .compose(RxUtil.<List<Notification>>booleanSchedulers(view, isRefresh))
+            .compose(RxUtil.<List<Notification>>bindToLifecycle(view))
             .subscribe(new ErrorHandleSubscriber<List<Notification>>(mErrorHandler) {
               @Override
               public void onError(@NonNull Throwable e) {
@@ -175,16 +155,13 @@ public class NotificationPresenter implements NotificationMVP.Presenter {
                 }
                 view.setEmpty(mList.isEmpty());
               }
-            })
-    );
+            });
   }
 
   public void deleteNotification(final Notification notification) {
-    compositeSubscription.add(
         model.deleteNotification(notification.getId())
-            .subscribeOn(Schedulers.io())
-            .retryWhen(new RetryWithDelay(3, 2))
-            .observeOn(AndroidSchedulers.mainThread())
+            .compose(RxUtil.<Ok>shortSchedulers())
+            .compose(RxUtil.<Ok>bindToLifecycle(view))
             .subscribe(new ErrorHandleSubscriber<Ok>(mErrorHandler) {
               @Override
               public void onError(@NonNull Throwable e) {
@@ -198,16 +175,13 @@ public class NotificationPresenter implements NotificationMVP.Presenter {
                 adapter.notifyDataSetChanged();
                 getUnreadCount();
               }
-            })
-    );
+            });
   }
 
   public void deleteAllNotifications() {
-    compositeSubscription.add(
         model.deleteAllNotifications()
-            .subscribeOn(Schedulers.io())
-            .retryWhen(new RetryWithDelay(3, 2))
-            .observeOn(AndroidSchedulers.mainThread())
+            .compose(RxUtil.<Ok>shortSchedulers())
+            .compose(RxUtil.<Ok>bindToLifecycle(view))
             .subscribe(new ErrorHandleSubscriber<Ok>(mErrorHandler) {
               @Override
               public void onError(@NonNull Throwable e) {
@@ -221,16 +195,13 @@ public class NotificationPresenter implements NotificationMVP.Presenter {
                 adapter.notifyDataSetChanged();
                 getUnreadCount();
               }
-            })
-    );
+            });
   }
 
   public void getUnreadCount() {
-    compositeSubscription.add(
         model.getUnreadCount()
-            .subscribeOn(Schedulers.io())
-            .retryWhen(new RetryWithDelay(3, 2))
-            .observeOn(AndroidSchedulers.mainThread())
+            .compose(RxUtil.<NotificationsUnreadCount>shortSchedulers())
+            .compose(RxUtil.<NotificationsUnreadCount>bindToLifecycle(view))
             .subscribe(new ErrorHandleSubscriber<NotificationsUnreadCount>(mErrorHandler) {
               @Override
               public void onNext(@NonNull NotificationsUnreadCount data) {
@@ -243,16 +214,13 @@ public class NotificationPresenter implements NotificationMVP.Presenter {
                 EventBus.getDefault()
                     .post(new GetUnreadCountEvent(data.getCount() > 0 ? true : false));
               }
-            })
-    );
+            });
   }
 
   public void readNotification(int[] ids) {
-    compositeSubscription.add(
         model.readNotification(ids)
-            .subscribeOn(Schedulers.io())
-            .retryWhen(new RetryWithDelay(3, 2))
-            .observeOn(AndroidSchedulers.mainThread())
+            .compose(RxUtil.<Ok>shortSchedulers())
+            .compose(RxUtil.<Ok>bindToLifecycle(view))
             .subscribe(new ErrorHandleSubscriber<Ok>(mErrorHandler) {
               @Override
               public void onError(@NonNull Throwable e) {
@@ -264,13 +232,11 @@ public class NotificationPresenter implements NotificationMVP.Presenter {
               public void onNext(@NonNull Ok data) {
                 ToastUtils.showShort("设置已读成功");
               }
-            })
-    );
+            });
   }
 
   @Override
   public void onDestroy() {
-    compositeSubscription.clear();
     adapter = null;
     view = null;
     mList = null;

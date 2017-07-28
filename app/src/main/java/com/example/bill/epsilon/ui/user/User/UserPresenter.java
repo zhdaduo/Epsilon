@@ -9,6 +9,7 @@ import com.example.bill.epsilon.bean.user.UserDetailInfo;
 import com.example.bill.epsilon.internal.di.scope.PerActivity;
 import com.example.bill.epsilon.ui.user.User.UserMVP.Model;
 import com.example.bill.epsilon.ui.user.User.UserMVP.View;
+import com.example.bill.epsilon.util.RxUtil;
 import javax.inject.Inject;
 import me.jessyan.rxerrorhandler.core.RxErrorHandler;
 import me.jessyan.rxerrorhandler.handler.ErrorHandleSubscriber;
@@ -26,7 +27,6 @@ import rx.subscriptions.CompositeSubscription;
 @PerActivity
 public class UserPresenter implements UserMVP.Presenter {
 
-  private CompositeSubscription compositeSubscription;
   private UserMVP.Model model;
   private UserMVP.View view;
   private RxErrorHandler mErrorHandler;
@@ -37,7 +37,6 @@ public class UserPresenter implements UserMVP.Presenter {
     this.model = model;
     this.view = view;
     this.mErrorHandler = handler;
-    compositeSubscription = new CompositeSubscription();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN) public void onUnFollowUser(UnFollowUserEvent event) {
@@ -49,26 +48,21 @@ public class UserPresenter implements UserMVP.Presenter {
   }
 
   public void getUser(String username) {
-    compositeSubscription.add(
         model.getUserInfo(username)
-            .subscribeOn(Schedulers.io())
-            .retryWhen(new RetryWithDelay(3, 2))
-            .observeOn(AndroidSchedulers.mainThread())
+            .compose(RxUtil.<UserDetailInfo>shortSchedulers())
+            .compose(RxUtil.<UserDetailInfo>bindToLifecycle(view))
             .subscribe(new ErrorHandleSubscriber<UserDetailInfo>(mErrorHandler) {
               @Override
               public void onNext(@NonNull UserDetailInfo data) {
                 view.onGetUserInfo(data);
               }
-            })
-    );
+            });
   }
 
   public void followUser(String username) {
-    compositeSubscription.add(
         model.followUser(username)
-            .subscribeOn(Schedulers.io())
-            .retryWhen(new RetryWithDelay(3, 2))
-            .observeOn(AndroidSchedulers.mainThread())
+            .compose(RxUtil.<Ok>shortSchedulers())
+            .compose(RxUtil.<Ok>bindToLifecycle(view))
             .subscribe(new ErrorHandleSubscriber<Ok>(mErrorHandler) {
               @Override
               public void onError(@NonNull Throwable e) {
@@ -80,16 +74,13 @@ public class UserPresenter implements UserMVP.Presenter {
               public void onNext(@NonNull Ok data) {
                 view.onFollowUser();
               }
-            })
-    );
+            });
   }
 
   public void unfollowUser(String username) {
-    compositeSubscription.add(
     model.unfollowUser(username)
-        .subscribeOn(Schedulers.io())
-        .retryWhen(new RetryWithDelay(3, 2))
-        .observeOn(AndroidSchedulers.mainThread())
+        .compose(RxUtil.<Ok>shortSchedulers())
+        .compose(RxUtil.<Ok>bindToLifecycle(view))
         .subscribe(new ErrorHandleSubscriber<Ok>(mErrorHandler) {
           @Override
           public void onError(@NonNull Throwable e) {
@@ -102,13 +93,11 @@ public class UserPresenter implements UserMVP.Presenter {
           public void onNext(@NonNull Ok ok) {
             view.onUnFollowUser();
           }
-        })
-    );
+        });
   }
 
   @Override
   public void onDestroy() {
-    compositeSubscription.clear();
     view = null;
     mErrorHandler = null;
   }

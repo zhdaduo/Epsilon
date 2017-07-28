@@ -26,6 +26,7 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.example.bill.epsilon.AndroidApplication;
 import com.example.bill.epsilon.R;
 import com.example.bill.epsilon.bean.newsnode.NewsNode;
+import com.example.bill.epsilon.ui.base.BaseActivity;
 import com.example.bill.epsilon.util.Constant;
 import com.example.bill.epsilon.util.PrefUtil;
 import com.example.bill.epsilon.view.widget.FlowLayout;
@@ -41,7 +42,7 @@ import javax.inject.Inject;
  * Created by Bill on 2017/7/20.
  */
 
-public class CreateNewsActivity extends AppCompatActivity implements CreateNewsMVP.View {
+public class CreateNewsActivity extends BaseActivity implements CreateNewsMVP.View {
 
   private MaterialDialog mDialog;
   private Unbinder mUnbinder;

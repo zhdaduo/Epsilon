@@ -12,6 +12,7 @@ import com.example.bill.epsilon.ui.news.CreateNews.CreateNewsMVP.Model;
 import com.example.bill.epsilon.ui.news.CreateNews.CreateNewsMVP.View;
 import com.example.bill.epsilon.util.Constant;
 import com.example.bill.epsilon.util.PrefUtil;
+import com.example.bill.epsilon.util.RxUtil;
 import com.google.gson.GsonBuilder;
 import java.util.List;
 import javax.inject.Inject;
@@ -30,43 +31,24 @@ import rx.subscriptions.CompositeSubscription;
 @PerActivity
 public class CreateNewsPresenter implements CreateNewsMVP.Presenter {
 
-  private CompositeSubscription compositeSubscription;
   private CreateNewsMVP.Model model;
   private CreateNewsMVP.View view;
   private RxErrorHandler mErrorHandler;
-  private Navigator navigator;
   private Context context;
 
   @Inject
   public CreateNewsPresenter(Model model,
-      View view, RxErrorHandler handler, Navigator navigator, Context context) {
+      View view, RxErrorHandler handler, Context context) {
     this.model = model;
     this.view = view;
     this.mErrorHandler = handler;
-    this.navigator = navigator;
     this.context = context;
-    compositeSubscription = new CompositeSubscription();
   }
 
   public void createNews(String title, String link, int nodeId) {
-    compositeSubscription.add(
     model.createNews(title, link, nodeId)
-        .subscribeOn(Schedulers.io())
-        .retryWhen(new RetryWithDelay(3, 2))
-        .doOnSubscribe(new Action0() {
-          @Override
-          public void call() {
-            view.showLoading();
-          }
-        })
-        .subscribeOn(AndroidSchedulers.mainThread())
-        .observeOn(AndroidSchedulers.mainThread())
-        .doAfterTerminate(new Action0() {
-          @Override
-          public void call() {
-            view.hideLoading();
-          }
-        })
+        .compose(RxUtil.<News>applySchedulers(view))
+        .compose(RxUtil.<News>bindToLifecycle(view))
         .subscribe(new ErrorHandleSubscriber<News>(mErrorHandler) {
           @Override
           public void onError(@NonNull Throwable e) {
@@ -80,16 +62,12 @@ public class CreateNewsPresenter implements CreateNewsMVP.Presenter {
             EventBus.getDefault().post(new CreateNewsEvent());
             view.closeActivity();
           }
-        })
-    );
+        });
   }
 
   public void getNewsNodes() {
-    compositeSubscription.add(
     model.getNewsNodes()
-        .subscribeOn(Schedulers.io())
-        .retryWhen(new RetryWithDelay(3, 2))
-        .observeOn(AndroidSchedulers.mainThread())
+        .compose(RxUtil.<List<NewsNode>>shortSchedulers())
         .subscribe(new ErrorHandleSubscriber<List<NewsNode>>(mErrorHandler) {
           @Override
           public void onNext(@NonNull List<NewsNode> data) {
@@ -99,14 +77,12 @@ public class CreateNewsPresenter implements CreateNewsMVP.Presenter {
             PrefUtil.getInstance(context, Constant.Token.SHARED_PREFERENCES_NAME)
                 .putString("news_nodes", builder.create().toJson(data));
           }
-        })
-    );
+        });
   }
 
   @Override
   public void onDestroy() {
     view = null;
-    compositeSubscription.clear();
     mErrorHandler = null;
   }
 }

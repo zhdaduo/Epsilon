@@ -11,6 +11,7 @@ import com.example.bill.epsilon.navigation.Navigator;
 import com.example.bill.epsilon.ui.main.MainMVP.Model;
 import com.example.bill.epsilon.ui.main.MainMVP.View;
 import com.example.bill.epsilon.util.PrefUtil;
+import com.example.bill.epsilon.util.RxUtil;
 import javax.inject.Inject;
 import me.jessyan.rxerrorhandler.core.RxErrorHandler;
 import me.jessyan.rxerrorhandler.handler.ErrorHandleSubscriber;
@@ -28,22 +29,18 @@ import rx.subscriptions.CompositeSubscription;
 @PerActivity
 public class MainPresenter implements MainMVP.Presenter {
 
-  private CompositeSubscription compositeSubscription;
   private MainMVP.Model model;
   private MainMVP.View view;
   private RxErrorHandler mErrorHandler;
-  private Navigator navigator;
   private Context context;
 
   @Inject
   public MainPresenter(Model model,
-      View view, RxErrorHandler handler, Navigator navigator, Context context) {
+      View view, RxErrorHandler handler, Context context) {
     this.model = model;
     this.view = view;
     this.mErrorHandler = handler;
-    this.navigator = navigator;
     this.context = context;
-    compositeSubscription = new CompositeSubscription();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN) public void onLogoutSuccess(LogoutEvent event) {
@@ -60,23 +57,19 @@ public class MainPresenter implements MainMVP.Presenter {
   }
 
   public void getUnreadCount() {
-    compositeSubscription.add(
         model.getUnreadCount()
-            .subscribeOn(Schedulers.io())
-            .retryWhen(new RetryWithDelay(3, 2))
-            .observeOn(AndroidSchedulers.mainThread())
+            .compose(RxUtil.<NotificationsUnreadCount>shortSchedulers())
+            .compose(RxUtil.<NotificationsUnreadCount>bindToLifecycle(view))
             .subscribe(new ErrorHandleSubscriber<NotificationsUnreadCount>(mErrorHandler) {
               @Override
               public void onNext(@NonNull NotificationsUnreadCount data) {
                 EventBus.getDefault().post(new GetUnreadCountEvent(data.getCount() > 0 ? true : false));
               }
-            })
-    );
+            });
   }
 
   @Override
   public void onDestroy() {
-    compositeSubscription.clear();
     view = null;
     mErrorHandler = null;
   }
