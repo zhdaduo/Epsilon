@@ -89,13 +89,13 @@ public class SignInPresenter implements SignInMVP.Presenter {
   private void Login(final String username) {
         model.Login(username)
             .compose(RxUtil.<UserDetailInfo>shortSchedulers())
-            .compose(RxUtil.<UserDetailInfo>bindToLifecycle(view))
             .doAfterTerminate(new Action0() {
               @Override
               public void call() {
                 view.hideLoading();
               }
             })
+            .compose(RxUtil.<UserDetailInfo>bindToLifecycle(view))
             .subscribe(new ErrorHandleSubscriber<UserDetailInfo>(mErrorHandler) {
               @Override
               public void onError(@NonNull Throwable e) {
